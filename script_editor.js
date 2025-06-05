@@ -41,6 +41,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const resetPositionBtn = document.getElementById('resetPositionBtn');
     const applyQrBtn = document.getElementById('applyQrBtn');
     
+    // Mobile position controls
+    const qrPositionXSlider = document.getElementById('qrPositionXSlider');
+    const qrPositionYSlider = document.getElementById('qrPositionYSlider');
+    const qrPositionXValue = document.getElementById('qrPositionXValue');
+    const qrPositionYValue = document.getElementById('qrPositionYValue');
+    const quickPosButtons = document.querySelectorAll('.quick-pos-btn');
+    
     // PDF and QR variables
     let pdfDoc = null;
     let secondPdfDoc = null; // Para el segundo PDF donde se insertará el QR
@@ -325,7 +332,22 @@ document.addEventListener('DOMContentLoaded', function() {
             qrPreview.classList.add('visible');
             updateQrPreviewSize();
             updateQrPreviewPosition();
+            updatePositionSliders();
+            updateSliderRanges(); // Actualizar rangos de sliders según el canvas
         }
+    }
+    
+    // Update slider ranges based on canvas size
+    function updateSliderRanges() {
+        if (!pdfCanvas || !qrPositionXSlider || !qrPositionYSlider) return;
+        
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        const maxX = canvasRect.width - qrSize;
+        const maxY = canvasRect.height - qrSize;
+        
+        // Los sliders van de 0-100 (porcentaje), no necesitamos cambiar max
+        // pero actualizamos los valores mostrados
+        updatePositionSliders();
     }
     
     // QR size control
@@ -333,6 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
         qrSize = parseInt(this.value);
         qrSizeValue.textContent = qrSize + 'px';
         updateQrPreviewSize();
+        updateSliderRanges(); // Actualizar cuando cambie el tamaño
+        updatePositionSliders(); // Actualizar posición relativa
     });
     
     // Update QR preview size
@@ -347,6 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetQrPosition() {
         qrPosition = { x: 50, y: 50 };
         updateQrPreviewPosition();
+        updatePositionSliders();
     }
     
     resetPositionBtn.addEventListener('click', resetQrPosition);
@@ -359,7 +384,112 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // QR dragging functionality
+    // Update position sliders to match current position
+    function updatePositionSliders() {
+        if (!pdfCanvas || !qrPositionXSlider || !qrPositionYSlider) return;
+        
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        const maxX = canvasRect.width - qrSize;
+        const maxY = canvasRect.height - qrSize;
+        
+        // Convert position to percentage
+        const xPercent = Math.round((qrPosition.x / maxX) * 100);
+        const yPercent = Math.round((qrPosition.y / maxY) * 100);
+        
+        qrPositionXSlider.value = Math.max(0, Math.min(100, xPercent));
+        qrPositionYSlider.value = Math.max(0, Math.min(100, yPercent));
+        
+        qrPositionXValue.textContent = Math.round(qrPosition.x) + 'px';
+        qrPositionYValue.textContent = Math.round(qrPosition.y) + 'px';
+    }
+    
+    // Position sliders event listeners
+    if (qrPositionXSlider) {
+        qrPositionXSlider.addEventListener('input', function() {
+            updateQrPositionFromSliders();
+        });
+    }
+    
+    if (qrPositionYSlider) {
+        qrPositionYSlider.addEventListener('input', function() {
+            updateQrPositionFromSliders();
+        });
+    }
+    
+    // Update QR position from sliders
+    function updateQrPositionFromSliders() {
+        if (!pdfCanvas || !qrPositionXSlider || !qrPositionYSlider) return;
+        
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        const maxX = canvasRect.width - qrSize;
+        const maxY = canvasRect.height - qrSize;
+        
+        // Convert percentage to pixels
+        const xPercent = parseInt(qrPositionXSlider.value);
+        const yPercent = parseInt(qrPositionYSlider.value);
+        
+        qrPosition.x = Math.max(0, Math.min((xPercent / 100) * maxX, maxX));
+        qrPosition.y = Math.max(0, Math.min((yPercent / 100) * maxY, maxY));
+        
+        updateQrPreviewPosition();
+        
+        qrPositionXValue.textContent = Math.round(qrPosition.x) + 'px';
+        qrPositionYValue.textContent = Math.round(qrPosition.y) + 'px';
+    }
+    
+    // Quick position buttons
+    quickPosButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const position = this.getAttribute('data-pos');
+            setQuickPosition(position);
+        });
+    });
+    
+    // Set quick position
+    function setQuickPosition(position) {
+        if (!pdfCanvas) return;
+        
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        const maxX = canvasRect.width - qrSize;
+        const maxY = canvasRect.height - qrSize;
+        const margin = 20; // Margen desde los bordes
+        
+        switch(position) {
+            case 'top-left':
+                qrPosition.x = margin;
+                qrPosition.y = margin;
+                break;
+            case 'top-right':
+                qrPosition.x = maxX - margin;
+                qrPosition.y = margin;
+                break;
+            case 'bottom-left':
+                qrPosition.x = margin;
+                qrPosition.y = maxY - margin;
+                break;
+            case 'bottom-right':
+                qrPosition.x = maxX - margin;
+                qrPosition.y = maxY - margin;
+                break;
+            case 'center':
+                qrPosition.x = maxX / 2;
+                qrPosition.y = maxY / 2;
+                break;
+        }
+        
+        updateQrPreviewPosition();
+        updatePositionSliders();
+        
+        // Visual feedback
+        this.style.backgroundColor = 'var(--primary)';
+        this.style.color = 'white';
+        setTimeout(() => {
+            this.style.backgroundColor = '';
+            this.style.color = '';
+        }, 200);
+    }
+    
+    // QR dragging functionality (Desktop)
     qrPreview.addEventListener('mousedown', function(e) {
         isDragging = true;
         const rect = qrPreview.getBoundingClientRect();
@@ -371,18 +501,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     document.addEventListener('mousemove', function(e) {
         if (isDragging) {
-            const canvasRect = pdfCanvas.getBoundingClientRect();
-            const newX = e.clientX - canvasRect.left - dragOffset.x;
-            const newY = e.clientY - canvasRect.top - dragOffset.y;
-            
-            // Constrain within canvas bounds
-            const maxX = canvasRect.width - qrSize;
-            const maxY = canvasRect.height - qrSize;
-            
-            qrPosition.x = Math.max(0, Math.min(newX, maxX));
-            qrPosition.y = Math.max(0, Math.min(newY, maxY));
-            
-            updateQrPreviewPosition();
+            updateDragPosition(e.clientX, e.clientY);
         }
     });
     
@@ -390,8 +509,50 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isDragging) {
             isDragging = false;
             qrPreview.style.cursor = 'move';
+            updatePositionSliders();
         }
     });
+    
+    // Touch events for mobile
+    qrPreview.addEventListener('touchstart', function(e) {
+        isDragging = true;
+        const touch = e.touches[0];
+        const rect = qrPreview.getBoundingClientRect();
+        dragOffset.x = touch.clientX - rect.left;
+        dragOffset.y = touch.clientY - rect.top;
+        e.preventDefault();
+    }, { passive: false });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (isDragging && e.touches.length === 1) {
+            const touch = e.touches[0];
+            updateDragPosition(touch.clientX, touch.clientY);
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', function(e) {
+        if (isDragging) {
+            isDragging = false;
+            updatePositionSliders();
+        }
+    });
+    
+    // Update drag position (shared function for mouse and touch)
+    function updateDragPosition(clientX, clientY) {
+        const canvasRect = pdfCanvas.getBoundingClientRect();
+        const newX = clientX - canvasRect.left - dragOffset.x;
+        const newY = clientY - canvasRect.top - dragOffset.y;
+        
+        // Constrain within canvas bounds
+        const maxX = canvasRect.width - qrSize;
+        const maxY = canvasRect.height - qrSize;
+        
+        qrPosition.x = Math.max(0, Math.min(newX, maxX));
+        qrPosition.y = Math.max(0, Math.min(newY, maxY));
+        
+        updateQrPreviewPosition();
+    }
     
     // Función para procesar la respuesta de la API
     function procesarRespuestaAPI(datos) {
@@ -818,4 +979,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     console.log("Script del editor cargado correctamente - usando menuidac.com con doble PDF");
-}); 
+});
