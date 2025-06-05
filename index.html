@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertidor de PDF a Código QR</title>
+    <title>Editor PDF con Código QR</title>
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     
+    <!-- PDF.js y PDF-lib -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    
     <!-- Archivo CSS externo -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles_editor.css" />
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>Convertidor de PDF a Código QR</h1>
-            <p>Transforma tus documentos PDF en códigos QR fácilmente compartibles</p>
+            <h1>Editor PDF con Código QR</h1>
+            <p>Transforma tus documentos PDF e inserta códigos QR directamente en ellos</p>
         </header>
         
         <!-- Main Content -->
@@ -60,7 +64,7 @@
                     <!-- Progress Bar (hidden by default) -->
                     <div id="progressContainer" style="display:none; margin-top: 1rem;">
                         <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #475569; margin-bottom: 0.25rem;">
-                            <span>Subiendo archivo...</span>
+                            <span>Procesando archivo...</span>
                             <span id="progressPercentage">0%</span>
                         </div>
                         <div class="progress-bar-container">
@@ -91,11 +95,117 @@
                         <input type="text" id="customName" class="custom-input" placeholder="Ingresa un nombre para tu código QR">
                     </div>
                     
+                    <!-- QR Action Options -->
+                    <div class="qr-action-container">
+                        <label class="toggle-label">¿Qué deseas hacer con el código QR?</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="qrAction" value="download" checked>
+                                <span class="radio-text">
+                                    <i class="fas fa-download"></i>
+                                    Solo descargar el código QR
+                                </span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="qrAction" value="embed">
+                                <span class="radio-text">
+                                    <i class="fas fa-edit"></i>
+                                    Insertar QR directamente en el PDF
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                    
                     <!-- Process Button -->
                     <div style="margin-top: 2rem; text-align: center;">
                         <button type="button" id="processBtn" class="process-btn" disabled>
                             <i class="fas fa-qrcode"></i> Procesar y Generar QR
                         </button>
+                    </div>
+                </div>
+                
+                <!-- PDF Editor Section (hidden by default) -->
+                <div id="pdfEditorSection" style="display:none" class="section">
+                    <h2>Selecciona el PDF donde insertar el código QR</h2>
+                    
+                    <!-- Second PDF Upload -->
+                    <div class="second-pdf-container">
+                        <div class="info-banner">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Tu documento original ya está procesado</strong>
+                                <p>Ahora selecciona el PDF donde quieres insertar el código QR que apunta a tu documento.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="dropAreaSecond" class="drop-area drop-area-secondary">
+                            <div>
+                                <i class="fas fa-file-pdf"></i>
+                                <p>Selecciona el PDF donde insertar el QR</p>
+                                <p>Este será el documento que contendrá el código QR</p>
+                                
+                                <div style="margin-top: 1.5rem;">
+                                    <label for="fileInputSecond" class="select-file-btn">
+                                        <i class="fas fa-upload"></i> Seleccionar PDF destino
+                                    </label>
+                                    <input type="file" id="fileInputSecond" accept=".pdf" style="display:none">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Second PDF Info -->
+                        <div id="fileInfoContainerSecond" style="display:none; margin-top: 1rem;">
+                            <div style="display: flex; align-items: center; padding: 0.75rem; background-color: #f0f9ff; border-radius: 0.375rem; border: 1px solid #0ea5e9;">
+                                <i class="fas fa-file-pdf" style="font-size: 1.5rem; color: #0ea5e9; margin-right: 0.75rem;"></i>
+                                <div style="flex: 1;">
+                                    <p id="selectedFileNameSecond" style="font-weight: 500; margin: 0 0 0.25rem 0;">documento_destino.pdf</p>
+                                    <p id="selectedFileSizeSecond" style="color: #0369a1; font-size: 0.875rem; margin: 0;">Tamaño: 1.2 MB</p>
+                                    <p style="color: #0369a1; font-size: 0.75rem; margin: 0.25rem 0 0 0;">PDF donde se insertará el código QR</p>
+                                </div>
+                                <button type="button" id="removeFileSecondBtn" style="background: none; border: none; color: #0369a1; cursor: pointer;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Editor Controls (shown after second PDF is loaded) -->
+                    <div id="editorControlsContainer" style="display:none;">
+                        <div class="editor-controls">
+                            <div class="page-controls">
+                                <button type="button" id="prevPageBtn" class="control-btn">
+                                    <i class="fas fa-chevron-left"></i> Página anterior
+                                </button>
+                                <span id="pageInfo" class="page-info">Página 1 de 1</span>
+                                <button type="button" id="nextPageBtn" class="control-btn">
+                                    Página siguiente <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="qr-controls">
+                                <label class="control-label">Tamaño del QR:</label>
+                                <input type="range" id="qrSizeSlider" min="50" max="200" value="100" class="size-slider">
+                                <span id="qrSizeValue">100px</span>
+                            </div>
+                        </div>
+                        
+                        <div class="pdf-editor-container">
+                            <div class="pdf-preview-container">
+                                <canvas id="pdfCanvas" class="pdf-canvas"></canvas>
+                                <div id="qrPreview" class="qr-preview">
+                                    <img id="qrPreviewImg" src="" alt="QR Preview">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="editor-actions">
+                            <button type="button" id="resetPositionBtn" class="secondary-btn">
+                                <i class="fas fa-undo"></i> Resetear posición
+                            </button>
+                            <button type="button" id="applyQrBtn" class="process-btn">
+                                <i class="fas fa-check"></i> Aplicar QR y Descargar PDF
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -163,7 +273,7 @@
         
         <!-- Footer -->
         <footer class="footer">
-            <p>© 2025 Convertidor PDF a QR.</p>
+            <p>© 2025 Editor PDF con QR.</p>
             <div class="footer-links">
                 <a href="#">Ayuda</a>
                 <a href="#">Privacidad</a>
@@ -173,6 +283,6 @@
     </div>
 
     <!-- Archivo JavaScript externo -->
-    <script src="script.js"></script>
+    <script src="script_editor.js"></script>
 </body>
 </html>

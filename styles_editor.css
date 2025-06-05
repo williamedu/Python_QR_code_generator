@@ -13,7 +13,7 @@ body {
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
@@ -113,6 +113,126 @@ body {
     margin-top: 1.5rem;
 }
 
+/* Second PDF Upload Styles */
+.second-pdf-container {
+    margin-bottom: 2rem;
+}
+
+.info-banner {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    background-color: #dbeafe;
+    border: 1px solid #93c5fd;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-banner i {
+    color: #2563eb;
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.info-banner div {
+    flex: 1;
+}
+
+.info-banner strong {
+    color: #1e40af;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.info-banner p {
+    color: #1e40af;
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.drop-area-secondary {
+    border-color: #0ea5e9;
+    background-color: rgba(14, 165, 233, 0.05);
+}
+
+.drop-area-secondary:hover {
+    border-color: #0284c7;
+    background-color: rgba(14, 165, 233, 0.1);
+}
+
+.drop-area-secondary i {
+    color: #0ea5e9;
+}
+
+.drop-area-secondary p:first-of-type {
+    color: #0369a1;
+}
+
+.drop-area-secondary p:last-of-type {
+    color: #0284c7;
+}
+
+/* Editor Controls Container */
+#editorControlsContainer {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px dashed #e5e7eb;
+}
+.qr-action-container {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.75rem;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-option:hover {
+    border-color: var(--primary-light);
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 0.75rem;
+    transform: scale(1.2);
+}
+
+.radio-option input[type="radio"]:checked + .radio-text {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    border-color: var(--primary);
+    background-color: rgba(79, 70, 229, 0.05);
+}
+
+.radio-text {
+    display: flex;
+    align-items: center;
+    color: #374151;
+}
+
+.radio-text i {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+}
+
 /* Toggle Switch Styling */
 .toggle-switch {
     position: relative;
@@ -167,6 +287,152 @@ body {
     font-size: 1rem;
 }
 
+/* PDF Editor Styles */
+.editor-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.control-btn {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.control-btn:hover {
+    background-color: #f3f4f6;
+    border-color: var(--primary);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: 500;
+    color: #374151;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    border-radius: 0.375rem;
+    border: 1px solid #d1d5db;
+}
+
+.qr-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.control-label {
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.size-slider {
+    width: 120px;
+}
+
+.pdf-editor-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.pdf-preview-container {
+    position: relative;
+    display: inline-block;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.qr-preview {
+    position: absolute;
+    cursor: move;
+    border: 2px dashed var(--primary);
+    border-radius: 0.25rem;
+    background-color: rgba(79, 70, 229, 0.1);
+    display: none;
+    user-select: none;
+    z-index: 10;
+}
+
+.qr-preview.visible {
+    display: block;
+}
+
+.qr-preview:hover {
+    border-color: var(--primary-light);
+    background-color: rgba(79, 70, 229, 0.15);
+}
+
+.qr-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.9;
+}
+
+.editor-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.secondary-btn {
+    background-color: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.secondary-btn:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.secondary-btn i {
+    margin-right: 0.5rem;
+}
+
+/* Results Section */
 .results-section {
     display: flex;
     flex-wrap: wrap;
@@ -390,5 +656,31 @@ body {
 @media (max-width: 768px) {
     .results-section {
         flex-direction: column;
+    }
+    
+    .editor-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .page-controls {
+        justify-content: center;
+    }
+    
+    .qr-controls {
+        justify-content: center;
+    }
+    
+    .radio-group {
+        gap: 0.75rem;
+    }
+    
+    .radio-option {
+        padding: 0.75rem;
+    }
+    
+    .editor-actions {
+        flex-direction: column;
+        align-items: stretch;
     }
 }
